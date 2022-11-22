@@ -30,8 +30,9 @@ export default function CardPokemon(props: IPokemon) {
         <img src={item.front_default} alt="" />
       </Card.Body>
       <Card.Footer>
-        <div className="flex justify-center items-center w-full">
+        <div className="flex justify-center flex-col items-center w-full">
           <span className="font-[700]">{props.name}</span>
+          {props.nickname && <span className="text-xs">{props.nickname}</span>}
         </div>
       </Card.Footer>
     </Card>

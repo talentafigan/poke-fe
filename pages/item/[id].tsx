@@ -1,18 +1,25 @@
 import LayoutContainer from "../../components/layout/Container";
 import { PokemonApi } from "../../api/item.api";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { Badge, Button, Loading } from "@nextui-org/react";
+import { useEffect, useRef, useState } from "react";
+import { Badge, Button, Input, Loading, Modal } from "@nextui-org/react";
 import helpers from "../../plugins/helpers";
 import CommonProgressBar from "../../components/common/ProgressBar";
+import { ItemApi } from "../../api/user.api";
+import { toast } from "react-toastify";
 
 export default function PageDetailItem() {
   const router = useRouter();
+  const pokemonNicknameRef = useRef(null) as any;
   const pokemonApi = new PokemonApi();
+  const itemApi = new ItemApi();
   const { id } = router.query;
+  const [isHasAlready, setIsHasAlready] = useState(false);
   const [item, setItem] = useState<any>({});
-  const [gender, setGender] = useState();
+  const [isLoadingSavePokemon, setIsLoadingSavePokemon] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [dialogItem, setDialogItem] = useState(false);
+  const [isLoadingCatchPoke, setIsLoadingCatchPoke] = useState(false);
   const fetchPokemon = async () => {
     try {
       setIsLoading(true);
@@ -26,8 +33,45 @@ export default function PageDetailItem() {
   };
   useEffect(() => {
     if (!id) return;
+    console.log("hello");
     fetchPokemon();
+    checkingItemFromCollection();
   }, [id]);
+
+  const checkingItemFromCollection = async () => {
+    try {
+      const resp = await itemApi.getOne(router.query.id);
+      setIsHasAlready(true);
+    } catch (error) {}
+  };
+  const savePokemon = async () => {
+    try {
+      setIsLoadingSavePokemon(true);
+      const resp = await itemApi.create({
+        nickname: pokemonNicknameRef?.current?.value,
+        item: router.query.id,
+      });
+      setDialogItem(false);
+      router.push("/account/item");
+    } catch (error) {
+      setIsLoadingSavePokemon(false);
+    }
+  };
+  const catchPokemon = async () => {
+    try {
+      setIsLoadingCatchPoke(true);
+      const resp = await itemApi.bet();
+      setDialogItem(true);
+    } catch (error) {
+      toast.error("Failed Catch Pokemon , Try Again Later", {
+        autoClose: 2000,
+        hideProgressBar: true,
+        theme: "colored",
+      });
+    } finally {
+      setIsLoadingCatchPoke(false);
+    }
+  };
   function MoveListComponent() {
     return (
       <div className="w-full flex flex-wrap">
@@ -130,10 +174,71 @@ export default function PageDetailItem() {
           <TypeListComponent />
           <span className="font-[700] text-gray-400 mt-4 mb-2">Moves</span>
           <MoveListComponent />
-          <Button className="mt-4">Catch Pokemon</Button>
+          {!isHasAlready && (
+            <Button
+              disabled={isLoadingCatchPoke}
+              onClick={catchPokemon}
+              className="mt-4"
+            >
+              Catch Pokemon
+            </Button>
+          )}
+          {isHasAlready && (
+            <Button
+              disabled={isLoadingCatchPoke}
+              onClick={() => router.push("/account/item/" + router.query.id)}
+              className="mt-4"
+              color={"error"}
+            >
+              Release
+            </Button>
+          )}
           <span className="font-[700] text-gray-400 mt-4 mb-2">Stats</span>
           <PokemonStatsListComponent />
         </div>
+        <Modal
+          closeButton
+          preventClose
+          aria-labelledby="modal-title"
+          open={dialogItem}
+          onClose={() => setDialogItem(false)}
+        >
+          <Modal.Header>
+            <span className="text-xl font-[700]">
+              {helpers.capitalizationFormat(item.name)} Been Catched !
+            </span>
+          </Modal.Header>
+          <div className="w-full flex justify-center items-center">
+            <img
+              src={item.sprites ? item.sprites.front_default : ""}
+              alt=""
+              className="h-[30vh]"
+            />
+          </div>
+          <Modal.Body>
+            <Input
+              bordered
+              fullWidth
+              ref={pokemonNicknameRef}
+              color="primary"
+              size="lg"
+              placeholder="Give pokemon a name"
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              auto
+              flat
+              color="error"
+              onClick={() => setDialogItem(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={savePokemon} disabled={isLoadingSavePokemon} auto>
+              Save
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     );
   }

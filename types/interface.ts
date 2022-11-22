@@ -5,5 +5,6 @@ export interface IContainer {
 export interface IPokemon {
   name: string;
   url: string;
+  nickname?: string;
   onSelect: Function;
 }
