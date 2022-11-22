@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.card-pokemon-body {
+    background-image: url('../img/bloob.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+}
