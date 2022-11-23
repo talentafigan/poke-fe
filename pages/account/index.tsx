@@ -18,7 +18,7 @@ export default function PageAccount() {
   }, []);
   const fetchMe = async () => {
     try {
-      const resp = await authApi.fetchMe();
+      const resp = await authApi.fetchMe(localStorage.getItem("token"));
       setProfile(resp.data);
     } catch (error) {
       toast.error("Failed Fetch Profile , Try Again Later", {
@@ -30,11 +30,17 @@ export default function PageAccount() {
   };
   const fetchItem = async () => {
     try {
-      const resp = await itemApi.get();
+      const resp = await itemApi.get(localStorage.getItem("token"));
       setTotalItem(resp.data.length);
     } catch (error) {
       console.log(error);
     }
+  };
+  const onClickTotalItem = () => {
+    if (totalItem === 0) {
+      return;
+    }
+    router.push("/account/item");
   };
   return (
     <LayoutContainer>
@@ -52,7 +58,7 @@ export default function PageAccount() {
           <div className="flex mt-4 justify-center items-center flex-col">
             <span className="text-sm font-[500]">Total Pokemon</span>
             <span
-              onClick={() => router.push("/account/item")}
+              onClick={onClickTotalItem}
               className="cursor-pointer text-blue-400 font-[500]"
             >
               {totalItem}

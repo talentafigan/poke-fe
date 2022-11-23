@@ -5,7 +5,11 @@ export class AuthApi {
   login(data: { username: string; password: string }) {
     return axios.post(this.POKE_BE_URL + "/auth/login", data);
   }
-  fetchMe() {
-    return axios.get(this.POKE_BE_URL + "/auth/fetch-me");
+  fetchMe(token?: any) {
+    return axios.get(this.POKE_BE_URL + "/auth/fetch-me", {
+      headers: {
+        token: token,
+      },
+    });
   }
 }

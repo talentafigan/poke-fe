@@ -17,7 +17,7 @@ export default function PageAccountItem() {
   const fetchOwnedItem = async () => {
     try {
       setIsLoading(true);
-      const resp = await itemApi.get();
+      const resp = await itemApi.get(localStorage.getItem("token"));
       setCollection(resp.data);
     } catch (error) {
       console.log(error);

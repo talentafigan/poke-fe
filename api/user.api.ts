@@ -11,8 +11,12 @@ export class ItemApi {
   create(data: { nickname: any; item: any }) {
     return axios.post(this.POKE_BE_URL + "/user/item", data);
   }
-  get() {
-    return axios.get(this.POKE_BE_URL + "/user/item");
+  get(token?: any) {
+    return axios.get(this.POKE_BE_URL + "/user/item", {
+      headers: {
+        token: token,
+      },
+    });
   }
   getOne(item: any) {
     return axios.get(this.POKE_BE_URL + "/user/item/" + item);
